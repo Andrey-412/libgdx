@@ -86,8 +86,6 @@ public final class VertexAttribute {
 		this.normalized = normalized;
 		this.numComponents = numComponents;
 		this.size = numComponents * dataType.size;
-		if (size % 4 != 0) // FIXME not absolute sure if this check is required
-			throw new GdxRuntimeException("Vertex size must be aligned to four bytes");
 		this.alias = alias;
 		this.unit = index;
 		this.usageIndex = Integer.numberOfTrailingZeros(usage);

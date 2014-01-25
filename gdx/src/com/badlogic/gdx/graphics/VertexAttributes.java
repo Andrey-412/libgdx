@@ -86,7 +86,11 @@ public final class VertexAttributes implements Iterable<VertexAttribute> {
 		this(true, attributes);
 	}
 	
-	/** Constructor, sets the vertex attributes in a specific order */
+	/**
+	 * Constructor, sets the vertex attributes in a specific order
+	 * @param pedantic True to check the validity of the attributes (for OpenGL ES 1.x). 
+	 * @param attributes Each attribute within the vertex (in the specified order).
+	 */
 	public VertexAttributes (boolean pedantic, VertexAttribute... attributes) {
 		if (attributes.length == 0) throw new IllegalArgumentException("attributes must be >= 1");
 
@@ -100,6 +104,9 @@ public final class VertexAttributes implements Iterable<VertexAttribute> {
 			checkValidity();
 		
 		vertexSize = calculateOffsets();
+		
+		if (vertexSize % 4 != 0)
+			throw new GdxRuntimeException("Vertex size must be aligned to four bytes");
 	}
 
 	/** Returns the offset for the first VertexAttribute with the specified usage.
