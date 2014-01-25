@@ -468,6 +468,16 @@ public class Array<T> implements Iterable<T> {
 		return buffer.toString();
 	}
 
+	/** @see #Array(Class) */
+	static public <T> Array<T> of (Class<T> arrayType) {
+		return new Array<T>(arrayType);
+	}
+
+	/** @see #Array(boolean, int, Class) */
+	static public <T> Array<T> of (boolean ordered, int capacity, Class<T> arrayType) {
+		return new Array<T>(ordered, capacity, arrayType);
+	}
+
 	static public class ArrayIterator<T> implements Iterator<T>, Iterable<T> {
 		private final Array<T> array;
 		private final boolean allowRemove;
