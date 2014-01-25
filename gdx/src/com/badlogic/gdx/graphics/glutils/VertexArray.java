@@ -114,29 +114,27 @@ public class VertexArray implements VertexData {
 			case Usage.Position:
 				byteBuffer.position(attribute.offset);
 				gl.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-				gl.glVertexPointer(attribute.numComponents, GL10.GL_FLOAT, attributes.vertexSize, byteBuffer);
+				gl.glVertexPointer(attribute.numComponents, attribute.dataType.glEnum, attributes.vertexSize, byteBuffer);
 				break;
 
 			case Usage.Color:
 			case Usage.ColorPacked:
-				int colorType = GL10.GL_FLOAT;
-				if (attribute.usage == Usage.ColorPacked) colorType = GL11.GL_UNSIGNED_BYTE;
 				byteBuffer.position(attribute.offset);
 				gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-				gl.glColorPointer(attribute.numComponents, colorType, attributes.vertexSize, byteBuffer);
+				gl.glColorPointer(attribute.numComponents, attribute.dataType.glEnum, attributes.vertexSize, byteBuffer);
 				break;
 
 			case Usage.Normal:
 				byteBuffer.position(attribute.offset);
 				gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
-				gl.glNormalPointer(GL10.GL_FLOAT, attributes.vertexSize, byteBuffer);
+				gl.glNormalPointer(attribute.dataType.glEnum, attributes.vertexSize, byteBuffer);
 				break;
 
 			case Usage.TextureCoordinates:
 				gl.glClientActiveTexture(GL10.GL_TEXTURE0 + textureUnit);
 				gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 				byteBuffer.position(attribute.offset);
-				gl.glTexCoordPointer(attribute.numComponents, GL10.GL_FLOAT, attributes.vertexSize, byteBuffer);
+				gl.glTexCoordPointer(attribute.numComponents, attribute.dataType.glEnum, attributes.vertexSize, byteBuffer);
 				textureUnit++;
 				break;
 
@@ -199,11 +197,7 @@ public class VertexArray implements VertexData {
 				shader.enableVertexAttribute(location);
 				
 				byteBuffer.position(attribute.offset);
-				if (attribute.usage == Usage.ColorPacked)
-					shader.setVertexAttribute(location, attribute.numComponents, GL20.GL_UNSIGNED_BYTE, true, 
-						attributes.vertexSize, byteBuffer);
-				else
-					shader.setVertexAttribute(location, attribute.numComponents, GL20.GL_FLOAT, false, 
+				shader.setVertexAttribute(location, attribute.numComponents, attribute.dataType.glEnum, attribute.normalized, 
 						attributes.vertexSize, byteBuffer);
 			}
 		} else {
@@ -215,11 +209,7 @@ public class VertexArray implements VertexData {
 				shader.enableVertexAttribute(location);
 				
 				byteBuffer.position(attribute.offset);
-				if (attribute.usage == Usage.ColorPacked)
-					shader.setVertexAttribute(location, attribute.numComponents, GL20.GL_UNSIGNED_BYTE, true, 
-						attributes.vertexSize, byteBuffer);
-				else
-					shader.setVertexAttribute(location, attribute.numComponents, GL20.GL_FLOAT, false, 
+				shader.setVertexAttribute(location, attribute.numComponents, attribute.dataType.glEnum, attribute.normalized, 
 						attributes.vertexSize, byteBuffer);
 			}
 		}

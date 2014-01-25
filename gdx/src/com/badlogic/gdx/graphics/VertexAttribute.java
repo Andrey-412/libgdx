@@ -16,8 +16,10 @@
 
 package com.badlogic.gdx.graphics;
 
+import com.badlogic.gdx.graphics.VertexAttributes.DataType;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 /** A single vertex attribute defined by its {@link Usage}, its number of components and its shader alias. The Usage is needed for
  * the fixed function pipeline of OpenGL ES 1.x. Generic attributes are not supported in the fixed function pipeline. The number
@@ -28,8 +30,15 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 public final class VertexAttribute {
 	/** the attribute {@link Usage} **/
 	public final int usage;
+	/** the {@link DataType} of each component */
+	public final DataType dataType;
 	/** the number of components this attribute has **/
 	public final int numComponents;
+	/** the size in bytes of the attribute ({@link DataType#size} multiplied by {@link #numComponents}). */ 
+	public final int size;
+	/** Whether fixed-point data values should be normalized (true) or converted directly as fixed-point values (false)
+	 * when they are accessed (requires at least OpenGL ES 2.0). */
+	public final boolean normalized;
 	/** the offset of this attribute in bytes, don't change this! **/
 	public int offset;
 	/** the alias for the attribute used in a {@link ShaderProgram} **/
@@ -57,8 +66,28 @@ public final class VertexAttribute {
 	 * @param index unit/index of the attribute, used for boneweights and texture coordinates. 
 	 * */
 	public VertexAttribute (int usage, int numComponents, String alias, int index) {
+		this(usage, usage == Usage.ColorPacked ? DataType.UnsignedByte : DataType.Float, usage == Usage.ColorPacked, numComponents, alias, index);
+	}
+	
+	/** Constructs a new VertexAttribute.
+	 * 
+	 * @param usage the usage, used for the fixed function pipeline. Generic attributes are not supported in the fixed function
+	 *           pipeline.
+	 * @param dataType the {@link DataType} of each component
+	 * @param normalized Whether fixed-point data values should be normalized (true) or converted directly as fixed-point 
+	 * 			values (false) when they are accessed
+	 * @param numComponents the number of components of this attribute, must be between 1 and 4.
+	 * @param alias the alias used in a shader for this attribute. Can be changed after construction.
+	 * @param index unit/index of the attribute, used for boneweights and texture coordinates. 
+	 * */
+	public VertexAttribute (int usage, DataType dataType, boolean normalized, int numComponents, String alias, int index) {
 		this.usage = usage;
+		this.dataType = dataType;
+		this.normalized = normalized;
 		this.numComponents = numComponents;
+		this.size = numComponents * dataType.size;
+		if (size % 4 != 0) // FIXME not absolute sure if this check is required
+			throw new GdxRuntimeException("Vertex size must be aligned to four bytes");
 		this.alias = alias;
 		this.unit = index;
 		this.usageIndex = Integer.numberOfTrailingZeros(usage);
@@ -106,7 +135,8 @@ public final class VertexAttribute {
 	}
 	
 	public boolean equals (final VertexAttribute other) {
-		return other != null && usage == other.usage && numComponents == other.numComponents && alias.equals(other.alias) && unit == other.unit; 
+		return other != null && usage == other.usage && dataType == other.dataType 
+			&& numComponents == other.numComponents && alias.equals(other.alias) && unit == other.unit; 
 	}
 	
 	/** @return A unique number specifying the usage index (3 MSB) and unit (1 LSB). */ 

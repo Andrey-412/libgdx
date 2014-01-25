@@ -167,32 +167,29 @@ public class VertexBufferObject implements VertexData {
 		int numAttributes = attributes.size();
 
 		for (int i = 0; i < numAttributes; i++) {
-			VertexAttribute attribute = attributes.get(i);
+			final VertexAttribute attribute = attributes.get(i);
 
 			switch (attribute.usage) {
 			case Usage.Position:
 				gl.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-				gl.glVertexPointer(attribute.numComponents, GL10.GL_FLOAT, attributes.vertexSize, attribute.offset);
+				gl.glVertexPointer(attribute.numComponents, attribute.dataType.glEnum, attributes.vertexSize, attribute.offset);
 				break;
 
 			case Usage.Color:
 			case Usage.ColorPacked:
-				int colorType = GL10.GL_FLOAT;
-				if (attribute.usage == Usage.ColorPacked) colorType = GL11.GL_UNSIGNED_BYTE;
-
 				gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-				gl.glColorPointer(attribute.numComponents, colorType, attributes.vertexSize, attribute.offset);
+				gl.glColorPointer(attribute.numComponents, attribute.dataType.glEnum, attributes.vertexSize, attribute.offset);
 				break;
 
 			case Usage.Normal:
 				gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
-				gl.glNormalPointer(GL10.GL_FLOAT, attributes.vertexSize, attribute.offset);
+				gl.glNormalPointer(attribute.dataType.glEnum, attributes.vertexSize, attribute.offset);
 				break;
 
 			case Usage.TextureCoordinates:
 				gl.glClientActiveTexture(GL10.GL_TEXTURE0 + textureUnit);
 				gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-				gl.glTexCoordPointer(attribute.numComponents, GL10.GL_FLOAT, attributes.vertexSize, attribute.offset);
+				gl.glTexCoordPointer(attribute.numComponents, attribute.dataType.glEnum, attributes.vertexSize, attribute.offset);
 				textureUnit++;
 				break;
 
@@ -232,12 +229,8 @@ public class VertexBufferObject implements VertexData {
 					continue;
 				shader.enableVertexAttribute(location);
 	
-				if (attribute.usage == Usage.ColorPacked)
-					shader.setVertexAttribute(location, attribute.numComponents, GL20.GL_UNSIGNED_BYTE, true, attributes.vertexSize,
-						attribute.offset);
-				else
-					shader.setVertexAttribute(location, attribute.numComponents, GL20.GL_FLOAT, false, attributes.vertexSize,
-						attribute.offset);
+				shader.setVertexAttribute(location, attribute.numComponents, attribute.dataType.glEnum, attribute.normalized, 
+						attributes.vertexSize, attribute.offset);
 			}
 		} else {
 			for (int i = 0; i < numAttributes; i++) {
@@ -247,12 +240,8 @@ public class VertexBufferObject implements VertexData {
 					continue;
 				shader.enableVertexAttribute(location);
 	
-				if (attribute.usage == Usage.ColorPacked)
-					shader.setVertexAttribute(location, attribute.numComponents, GL20.GL_UNSIGNED_BYTE, true, attributes.vertexSize,
-						attribute.offset);
-				else
-					shader.setVertexAttribute(location, attribute.numComponents, GL20.GL_FLOAT, false, attributes.vertexSize,
-						attribute.offset);
+				shader.setVertexAttribute(location, attribute.numComponents, attribute.dataType.glEnum, attribute.normalized,
+						attributes.vertexSize, attribute.offset);
 			}
 		}
 		isBound = true;
