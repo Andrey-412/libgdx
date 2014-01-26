@@ -78,9 +78,13 @@ public final class VertexAttribute {
 	 * 			values (false) when they are accessed
 	 * @param numComponents the number of components of this attribute, must be between 1 and 4.
 	 * @param alias the alias used in a shader for this attribute. Can be changed after construction.
-	 * @param index unit/index of the attribute, used for boneweights and texture coordinates. 
-	 * */
+	 * @param index unit/index of the attribute, used for boneweights and texture coordinates.
+	 */
 	public VertexAttribute (int usage, DataType dataType, boolean normalized, int numComponents, String alias, int index) {
+		this(true, usage, dataType, normalized, numComponents, alias, index);
+	}
+	
+	protected VertexAttribute (boolean pedantic, int usage, DataType dataType, boolean normalized, int numComponents, String alias, int index) {
 		this.usage = usage;
 		this.dataType = dataType;
 		this.normalized = normalized;
@@ -89,6 +93,8 @@ public final class VertexAttribute {
 		this.alias = alias;
 		this.unit = index;
 		this.usageIndex = Integer.numberOfTrailingZeros(usage);
+		if (pedantic && (size % 4 != 0))
+			throw new GdxRuntimeException("Each vertex attribute size must be aligned to four bytes.");
 	}
 
 	public static VertexAttribute Position () {

@@ -19,6 +19,7 @@ package com.badlogic.gdx.graphics;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Array.ArrayIterator;
@@ -83,15 +84,10 @@ public final class VertexAttributes implements Iterable<VertexAttribute> {
 
 	/** Constructor, sets the vertex attributes in a specific order */
 	public VertexAttributes (VertexAttribute... attributes) {
-		this(true, attributes);
+		this(true, !Gdx.graphics.isGL20Available(), attributes);
 	}
 	
-	/**
-	 * Constructor, sets the vertex attributes in a specific order
-	 * @param pedantic True to check the validity of the attributes (for OpenGL ES 1.x). 
-	 * @param attributes Each attribute within the vertex (in the specified order).
-	 */
-	public VertexAttributes (boolean pedantic, VertexAttribute... attributes) {
+	protected VertexAttributes (boolean pedantic, boolean checkGLES1Validity, VertexAttribute... attributes) {
 		if (attributes.length == 0) throw new IllegalArgumentException("attributes must be >= 1");
 
 		VertexAttribute[] list = new VertexAttribute[attributes.length];
@@ -100,12 +96,12 @@ public final class VertexAttributes implements Iterable<VertexAttribute> {
 
 		this.attributes = list;
 
-		if (pedantic)
-			checkValidity();
+		if (checkGLES1Validity)
+			checkGLES1Validity();
 		
 		vertexSize = calculateOffsets();
 		
-		if (vertexSize % 4 != 0)
+		if (pedantic && (vertexSize % 4 != 0))
 			throw new GdxRuntimeException("Vertex size must be aligned to four bytes");
 	}
 
@@ -135,7 +131,7 @@ public final class VertexAttributes implements Iterable<VertexAttribute> {
 		return count;
 	}
 
-	private void checkValidity () {
+	private void checkGLES1Validity () {
 		boolean pos = false;
 		boolean cols = false;
 		boolean nors = false;
